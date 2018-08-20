@@ -1,101 +1,94 @@
-/* ДЗ 5 - DOM Events */
+/* ДЗ 6 - Асинхронность и работа с сетью */
 
 /*
  Задание 1:
 
- Функция должна добавлять обработчик fn события eventName к элементу target
+ Функция должна возвращать Promise, который должен быть разрешен через указанное количество секунду
 
  Пример:
-   addListener('click', document.querySelector('a'), () => console.log('...')) 
-   // должна добавить указанный обработчик кликов на указанный элемент
+   delayPromise(3) // вернет promise, который будет разрешен через 3 секунды
  */
-function addListener(eventName, target, fn) {
-  target.addEventListener(eventName, fn);
+function delayPromise(seconds) {
 }
 
 /*
  Задание 2:
 
- Функция должна удалять у элемента target обработчик fn события eventName
+ 2.1: Функция должна вернуть Promise, который должен быть разрешен с массивом городов в качестве значения
+
+ Массив городов пожно получить отправив асинхронный запрос по адресу
+ https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
+
+ 2.2: Элементы полученного массива должны быть отсортированы по имени города
 
  Пример:
-   removeListener('click', document.querySelector('a'), someHandler) // должна удалить указанный обработчик кликов на указанный элемент
+   loadAndSortTowns().then(towns => console.log(towns)) // должна вывести в консоль отсортированный массив городов
  */
-function removeListener(eventName, target, fn) {
-  target.removeEventListener(eventName, fn);
-}
-
-/*
- Задание 3:
-
- Функция должна добавить к элементу target такой обработчик на события eventName,
-  чтобы он отменял действия по умолчанию
-
- Пример:
-   skipDefault('click', document.querySelector('a')) 
-   // после вызова функции, клики на указанную ссылку не должны приводить к переходу на другую страницу
- */
-function skipDefault(eventName, target) {
-  target.addEventListener(eventName, eventName => eventName.preventDefault()); 
-}
-
-/*
- Задание 4:
-
- Функция должна эмулировать событие click для элемента target
-
- Пример:
-   emulateClick(document.querySelector('a')) 
-   // для указанного элемента должно быть сэмулировано события click
- */
-
-function emulateClick(target) {
-  var click = new Event('click');
-  target.dispatchEvent(click);
-}
-
-/*
- Задание 5:
-
- Функция должна добавить такой обработчик кликов к элементу target,
- который реагирует (вызывает fn) только на клики по элементам BUTTON внутри target
-
- Пример:
-   delegate(document.body, () => console.log('кликнули на button')) // добавит такой обработчик кликов для body, который будет вызывать указанную функцию только если кликнули на кнопку (элемент с тегом button)
- */
-// function delegate(target, fn) {
-//   if (target == document.getElementById('button')) {
-//     target.addEventListener(eventName, fn);
-//   }
-// }
-
-function delegate(target, fn) {
-  target.addEventListener('click', event => {
-    if (event.target.tagName == 'BUTTON') {
-      fn();
-    }
-  });
-}
-
-
-/*
- Задание 6:
-
- Функция должна добавить такой обработчик кликов к элементу target,
- который сработает только один раз и удалится (перестанет срабатывать для последующих кликов по указанному элементу)
-
- Пример:
-   once(document.querySelector('button'), () => console.log('обработчик выполнился!')) // добавит такой обработчик кликов для указанного элемента, который вызовется только один раз и затем удалится
- */
-function once(target, fn) {
-  target.addEventListener('click', fn, { once: true });
+function loadAndSortTowns() {
 }
 
 export {
-    addListener,
-    removeListener,
-    skipDefault,
-    emulateClick,
-    delegate,
-    once
+    delayPromise,
+    loadAndSortTowns
+};
+/* ДЗ 6 - Асинхронность и работа с сетью */
+
+/*
+ Задание 1:
+
+ Функция должна возвращать Promise, 
+ // который должен быть разрешен через указанное количество секунду
+
+ Пример:
+   delayPromise(3) // вернет promise, который будет разрешен через 3 секунды
+ */
+function delayPromise(seconds) {
+  return new Promise(function (resolved) {
+    setTimeout(resolved, seconds * 1000);
+  });
+}
+
+// почему этот вариант не правильный?
+// function delayPromise(seconds) {
+//   setTimeout(function () {
+//     return new Promise
+//   }, seconds);
+// }
+
+/*
+ Задание 2:
+
+ 2.1: Функция должна вернуть Promise, который должен быть разрешен с массивом городов
+  в качестве значения
+
+ Массив городов пожно получить отправив асинхронный запрос по адресу
+ https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
+
+ 2.2: Элементы полученного массива должны быть отсортированы по имени города
+
+ Пример:
+   loadAndSortTowns().then(towns => console.log(towns)) // должна вывести в консоль отсортированный массив городов
+ */
+
+function loadAndSortTowns() {
+  return new Promise(function (resolve, reject) {
+    fetch('https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
+      .then(resp => {
+        return resp.json();
+      })
+      .then(towns => {
+        let sortTowns = towns.sort((a, b) => {
+          return a.name > b.name ? 1 : -1;
+        })
+        resolve(sortTowns);
+      })
+      .catch((e) => reject(e));
+  })
+}
+
+
+
+export {
+  delayPromise,
+  loadAndSortTowns
 };
